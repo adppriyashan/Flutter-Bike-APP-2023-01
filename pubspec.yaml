@@ -1,0 +1,70 @@
+name: pickandgo
+description: Move with healthy transportation.
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=2.18.6 <3.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.2
+  dio: ^4.0.6
+  email_validator: ^2.0.1
+  fluttertoast: ^8.0.8
+  google_fonts: ^3.0.1
+  toggle_switch: ^2.0.1
+  image_picker: ^0.8.5+3
+  carousel_slider: ^4.1.1
+  flutter_slidable: ^2.0.0
+  local_auth: ^2.1.2
+  dropdown_plus: ^0.0.9
+  shared_preferences: ^2.0.15
+  syncfusion_flutter_calendar: ^20.2.43
+  syncfusion_flutter_datepicker: ^20.2.50
+  flutter_datetime_picker: ^1.5.1
+  cached_network_image: ^3.1.0
+  google_maps_flutter: ^2.2.3
+  intl: ^0.17.0
+  geolocator: ^9.0.2
+  qr_code_scanner: ^1.0.1
+  permission_handler: ^10.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^2.0.0
+
+flutter:
+
+  uses-material-design: true
+
+  assets:
+    - assets/images/user.png
+    - assets/images/logo.png
+    - assets/images/logo_text.png
+    - assets/images/mainScreenBg.png
+    - assets/images/loginScreenBg.png
+
+  fonts:
+    - family: Raleway
+      fonts:
+        - asset: assets/fonts/Raleway/static/Raleway-Regular.ttf
+          weight: 400
+    - family: Raleway-Medium
+      fonts:
+        - asset: assets/fonts/Raleway/static/Raleway-Medium.ttf
+          weight: 500
+    - family: Raleway-SemiBold
+      fonts:
+        - asset: assets/fonts/Raleway/static/Raleway-SemiBold.ttf
+          weight: 600
+    - family: Raleway-Bold
+      fonts:
+        - asset: assets/fonts/Raleway/static/Raleway-Bold.ttf
+          weight: 700
