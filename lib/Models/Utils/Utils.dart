@@ -18,6 +18,8 @@ class CustomUtils {
   static late String loggedInToken;
   static late User loggedInUser;
 
+  static String mapsApiKey='AIzaSyD8HZ9Is3SwaYwv9WiTvWZIKwVH15M8Dbw';
+
   static Map<int, Color> tabViewColor = {
     50: color1,
     100: color1,
