@@ -12,6 +12,9 @@ class APIRoutes {
       case 'QRSCAN':
         key = '${_baseRoute}reservation/qrscan';
         break;
+      case 'AVAILABLE_CHECK':
+        key = '${_baseRoute}reservation/availability';
+        break;
       case 'GET_AVAILABLE_BIKES':
         key = '${_baseRoute}bikes/get-available';
         break;

@@ -25,4 +25,20 @@ class QRController {
       }
     });
   }
+
+  Future<bool> availabilityQRCode(context, Map<String, dynamic> data) async {
+    CustomUtils.showLoader(context);
+    bool responseCheck=false;
+    await _httpController
+        .doGet(APIRoutes.getRoute('AVAILABLE_CHECK'), {}, data)
+        .then((Response response) async {
+          print(response.data);
+      CustomUtils.hideLoader(context);
+      var resp = JsonResponse.fromJson(response.data);
+      if (resp.statusCode == 200) {
+        responseCheck= true;
+      }
+    });
+    return responseCheck;
+  }
 }

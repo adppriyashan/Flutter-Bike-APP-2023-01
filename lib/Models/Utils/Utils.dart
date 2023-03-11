@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:pickandgo/Models/DB/User.dart';
 import 'package:pickandgo/Models/Strings/common.dart';
 import 'package:pickandgo/Models/Utils/Colors.dart';
+import 'package:pickandgo/Views/PopUps/Confirmation.dart';
 import 'package:pickandgo/Views/PopUps/Loading.dart';
 import 'package:pickandgo/Views/Widgets/custom_button.dart';
 
@@ -18,7 +19,7 @@ class CustomUtils {
   static late String loggedInToken;
   static late User loggedInUser;
 
-  static String mapsApiKey='AIzaSyD8HZ9Is3SwaYwv9WiTvWZIKwVH15M8Dbw';
+  static String mapsApiKey = 'AIzaSyD8HZ9Is3SwaYwv9WiTvWZIKwVH15M8Dbw';
 
   static Map<int, Color> tabViewColor = {
     50: color1,
@@ -61,6 +62,14 @@ class CustomUtils {
       context: context,
       builder: (_) => Loading(),
     );
+  }
+
+  static Future<bool> confirmationAction(context, title, message) async {
+    return await showDialog(
+          context: context,
+          builder: (_) => Confirmation(title: title, message: message),
+        ) ??
+        false;
   }
 
   static Future hideLoader(context) async {

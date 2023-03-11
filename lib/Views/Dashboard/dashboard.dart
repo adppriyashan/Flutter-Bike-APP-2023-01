@@ -264,7 +264,7 @@ class _DashboardState extends State<Dashboard> {
                     iconColor: color3,
                     isIconAvailable: true,
                     hint: 'Start your tour from',
-                    icon: Icons.start,
+                    icon: Icons.search,
                     textInputType: TextInputType.text,
                     obscureText: false,
                     controller: _from,
@@ -285,7 +285,7 @@ class _DashboardState extends State<Dashboard> {
                     iconColor: color3,
                     isIconAvailable: true,
                     hint: 'Destination',
-                    icon: Icons.start,
+                    icon: Icons.search,
                     textInputType: TextInputType.text,
                     obscureText: false,
                     controller: _to,
@@ -315,6 +315,7 @@ class _DashboardState extends State<Dashboard> {
                             Routes(context: context).navigate(Reservation(
                               bikes: value,
                               from: _fromLocation,
+                              to:_toLocation
                             ));
                           });
                         } else {
