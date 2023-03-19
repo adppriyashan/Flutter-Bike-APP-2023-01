@@ -53,6 +53,7 @@ flutter:
     - assets/images/logo_text_white.png
     - assets/images/mainScreenBg.png
     - assets/images/loginScreenBg.png
+    - assets/images/payment_gateway.png
 
   fonts:
     - family: Raleway

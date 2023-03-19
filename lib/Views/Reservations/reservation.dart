@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pickandgo/Controllers/QRController/QRController.dart';
 import 'package:pickandgo/Models/Strings/dashboard.dart';
@@ -11,7 +12,10 @@ import 'package:pickandgo/Models/Utils/Colors.dart';
 import 'package:pickandgo/Models/Utils/Common.dart';
 import 'package:pickandgo/Models/Utils/Routes.dart';
 import 'package:pickandgo/Models/Utils/Utils.dart';
+import 'package:pickandgo/Views/Dashboard/dashboard.dart';
 import 'package:pickandgo/Views/Reservations/reservation_payment.dart';
+import 'package:pickandgo/Views/Widgets/custom_button.dart';
+import 'package:pickandgo/Views/Widgets/custom_text_form_field.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -21,7 +25,8 @@ class Reservation extends StatefulWidget {
   dynamic to;
   dynamic bikes;
 
-  Reservation({Key? key, required this.bikes, required this.from, required this.to})
+  Reservation(
+      {Key? key, required this.bikes, required this.from, required this.to})
       : super(key: key);
 
   @override
@@ -33,7 +38,8 @@ class _ReservationState extends State<Reservation> {
   LatLng from;
   LatLng to;
   dynamic bikes;
-  _ReservationState({required this.bikes, required this.from,required this.to});
+  _ReservationState(
+      {required this.bikes, required this.from, required this.to});
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey qrKey = GlobalKey();
@@ -44,6 +50,8 @@ class _ReservationState extends State<Reservation> {
   bool isQr = false;
 
   final QRController _qrController = QRController();
+  final TextEditingController _rideOnController = TextEditingController();
+  DateTime? _rideOnDateTime;
 
   @override
   void reassemble() {
@@ -123,7 +131,8 @@ class _ReservationState extends State<Reservation> {
                                     dashboard_show_availabilities.toUpperCase(),
                                     style: TextStyle(
                                         fontWeight: FontWeight.w500,
-                                        color: color6),
+                                        color: color6,
+                                        fontSize: 16.0),
                                   ),
                                 )
                               ],
@@ -200,8 +209,10 @@ class _ReservationState extends State<Reservation> {
                                                             context,
                                                             "Confirmation",
                                                             "Are you sure reserve until you got it (For Maximum 1 Hour) ?")) {
-                                                      navigateTo(from.latitude,
-                                                          from.longitude);
+                                                      _rideOnDetails(base64Encode(
+                                                          utf8.encode(bike[
+                                                                  'mac_address']
+                                                              .toString())));
                                                     }
                                                   },
                                                   child: Icon(
@@ -251,7 +262,7 @@ class _ReservationState extends State<Reservation> {
         if (scanData.code!.contains('p&g_')) {
           String? scannedCode = scanData.code?.replaceAll('p&g_', '');
           setState(() {
-            isQr=false;
+            isQr = false;
             if (scannedCode != null) {
               _qrController.availabilityQRCode(context, {
                 'code': base64Encode(utf8.encode(scannedCode))
@@ -283,5 +294,94 @@ class _ReservationState extends State<Reservation> {
     } else {
       throw 'Could not launch ${uri.toString()}';
     }
+  }
+
+  void _rideOnDetails(String bikeMacAddress) {
+    showModalBottomSheet(
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(25.0))),
+      context: context,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
+          child: Wrap(
+            children: [
+              Center(
+                child: Text(
+                  dashboard_make_an_reservation.toUpperCase(),
+                  style: const TextStyle(
+                      fontSize: 15.0, fontWeight: FontWeight.w500),
+                ),
+              ),
+              Divider(
+                color: color3,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 5.0),
+                child: GestureDetector(
+                  onTap: () {
+                    DatePicker.showDateTimePicker(context,
+                        showTitleActions: true,
+                        minTime: DateTime.now(),
+                        maxTime: DateTime.now().add(const Duration(hours: 1)),
+                        onChanged: (date) {}, onConfirm: (date) {
+                      _rideOnDateTime = date;
+                      setState(() {
+                        _rideOnController.text = date.toString();
+                      });
+                    }, currentTime: DateTime.now(), locale: LocaleType.zh);
+                  },
+                  child: CustomTextFormField(
+                    readOnly: true,
+                    height: 5.0,
+                    backgroundColor: color7,
+                    iconColor: color3,
+                    isIconAvailable: true,
+                    hint: 'Enter start date and time',
+                    icon: Icons.search,
+                    textInputType: TextInputType.text,
+                    obscureText: false,
+                    controller: _rideOnController,
+                    validation: (value) {
+                      return null;
+                    },
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 5.0),
+                child: Center(
+                  child: CustomButton(
+                      buttonText:
+                          reservation_ride_temporary_reserve.toUpperCase(),
+                      textColor: color6,
+                      backgroundColor: color3,
+                      isBorder: false,
+                      borderColor: color6,
+                      onclickFunction: () async {
+                        if (_rideOnController.text.isNotEmpty &&
+                            _rideOnDateTime != null) {
+                          _qrController.reserveByHour(context, {
+                            'code': bikeMacAddress,
+                            'user': CustomUtils.getUser().id.toString(),
+                            'ride_at': _rideOnDateTime.toString(),
+                          });
+                          Routes(context: context)
+                              .navigateReplace(const Dashboard());
+                        } else {
+                          Navigator.pop(context);
+                          CustomUtils.showSnackBar(
+                              context,
+                              'Please select ride on date and time',
+                              CustomUtils.ERROR_SNACKBAR);
+                        }
+                      }),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }

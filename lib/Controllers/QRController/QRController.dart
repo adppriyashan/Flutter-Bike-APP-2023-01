@@ -26,6 +26,24 @@ class QRController {
     });
   }
 
+  Future<void> reserveByHour(context, Map<String, dynamic> data) async {
+    CustomUtils.showLoader(context);
+    await _httpController
+        .doGet(APIRoutes.getRoute('TEMP_RESERVATION'), {}, data)
+        .then((Response response) async {
+      CustomUtils.hideLoader(context);
+      print(response.data.toString());
+      var resp = JsonResponse.fromJson(response.data);
+      if (resp.statusCode == 200) {
+        CustomUtils.showSnackBar(
+            context, resp.data, CustomUtils.SUCCESS_SNACKBAR);
+      } else {
+        CustomUtils.showSnackBar(
+            context, resp.data, CustomUtils.ERROR_SNACKBAR);
+      }
+    });
+  }
+
   Future<bool> availabilityQRCode(context, Map<String, dynamic> data) async {
     CustomUtils.showLoader(context);
     bool responseCheck=false;

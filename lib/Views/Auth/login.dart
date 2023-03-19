@@ -3,6 +3,7 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pickandgo/Controllers/Auth/LoginController.dart';
 import 'package:pickandgo/Models/DB/User.dart';
 import 'package:pickandgo/Models/Strings/login_screen.dart';
@@ -13,6 +14,7 @@ import 'package:pickandgo/Models/Utils/Routes.dart';
 import 'package:pickandgo/Models/Utils/Utils.dart';
 import 'package:pickandgo/Models/Validation/FormValidation.dart';
 import 'package:pickandgo/Views/Auth/register.dart';
+import 'package:pickandgo/Views/Reservations/reservation_payment.dart';
 import 'package:pickandgo/Views/Widgets/custom_button.dart';
 import 'package:pickandgo/Views/Widgets/custom_back_button.dart';
 import 'package:pickandgo/Views/Widgets/custom_text_form_field.dart';
