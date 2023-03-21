@@ -5,3 +5,4 @@ String white_text_logo = 'assets/images/logo_text_white.png';
 String mainScreenBg = 'assets/images/mainScreenBg.png';
 String loginScreenBg = 'assets/images/loginScreenBg.png';
 String paymentTypes = 'assets/images/payment_gateway.png';
+String reservationOngoing = 'assets/images/ongoing.png';

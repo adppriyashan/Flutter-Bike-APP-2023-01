@@ -8,15 +8,16 @@ import 'package:pickandgo/Models/Utils/Utils.dart';
 class QRController {
   final HttpController _httpController = HttpController();
 
-  Future<void> scanQRCode(context, Map<String, dynamic> data) async {
+  Future<bool> scanQRCode(context, data) async {
+    bool respCheck = false;
     CustomUtils.showLoader(context);
     await _httpController
         .doGet(APIRoutes.getRoute('QRSCAN'), {}, data)
         .then((Response response) async {
       CustomUtils.hideLoader(context);
-      print(response.data.toString());
       var resp = JsonResponse.fromJson(response.data);
       if (resp.statusCode == 200) {
+        respCheck = true;
         CustomUtils.showSnackBar(
             context, resp.data, CustomUtils.SUCCESS_SNACKBAR);
       } else {
@@ -24,17 +25,19 @@ class QRController {
             context, resp.data, CustomUtils.ERROR_SNACKBAR);
       }
     });
+    return respCheck;
   }
-
-  Future<void> reserveByHour(context, Map<String, dynamic> data) async {
+  
+  Future<bool> reserveByHour(context, data) async {
+    bool respCheck = false;
     CustomUtils.showLoader(context);
     await _httpController
         .doGet(APIRoutes.getRoute('TEMP_RESERVATION'), {}, data)
         .then((Response response) async {
       CustomUtils.hideLoader(context);
-      print(response.data.toString());
       var resp = JsonResponse.fromJson(response.data);
       if (resp.statusCode == 200) {
+        respCheck = true;
         CustomUtils.showSnackBar(
             context, resp.data, CustomUtils.SUCCESS_SNACKBAR);
       } else {
@@ -42,21 +45,26 @@ class QRController {
             context, resp.data, CustomUtils.ERROR_SNACKBAR);
       }
     });
+    return respCheck;
   }
 
-  Future<bool> availabilityQRCode(context, Map<String, dynamic> data) async {
+  Future<dynamic> availabilityQRCode(context, Map<String, dynamic> data) async {
     CustomUtils.showLoader(context);
-    bool responseCheck=false;
+    dynamic responseOther = 2;
     await _httpController
         .doGet(APIRoutes.getRoute('AVAILABLE_CHECK'), {}, data)
         .then((Response response) async {
-          print(response.data);
+      print('XXXXXXXXXXXXXXXXXXXXXXXXXXXXX');
+      print(response.data);
       CustomUtils.hideLoader(context);
       var resp = JsonResponse.fromJson(response.data);
       if (resp.statusCode == 200) {
-        responseCheck= true;
+        responseOther = resp.data;
+      } else {
+        CustomUtils.showSnackBar(
+            context, resp.data, CustomUtils.ERROR_SNACKBAR);
       }
     });
-    return responseCheck;
+    return responseOther;
   }
 }

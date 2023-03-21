@@ -50,6 +50,11 @@ class _DashboardState extends State<Dashboard> {
 
   bool continueReservation = false;
 
+  dynamic availableBikes = [];
+  dynamic myExistingRide = 0;
+
+  bool isFirstRequestSent = false;
+
   @override
   void initState() {
     super.initState();
@@ -164,25 +169,65 @@ class _DashboardState extends State<Dashboard> {
                       //   ),
                       // )
                     ],
-                  ))
+                  )),
+              (myExistingRide != 0 && myExistingRide['is_paid'] == '1')
+                  ? Expanded(
+                      flex: 0,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20.0, vertical: 15.0),
+                        width: double.infinity,
+                        color: color3,
+                        child: Center(
+                          child: Text(
+                            dashboard_ongoing.toUpperCase(),
+                            style: TextStyle(
+                                fontWeight: FontWeight.w500, color: color6),
+                          ),
+                        ),
+                      ))
+                  : const SizedBox.shrink()
             ],
           ),
         )),
-        floatingActionButton: Padding(
-          padding: const EdgeInsets.only(bottom: 10.0),
-          child: FloatingActionButton.extended(
-            onPressed: () => _makePreReservation(),
-            label: Text(
-              dashboard_make_an_reservation.toUpperCase(),
-              style: TextStyle(fontWeight: FontWeight.w500, color: color6),
-            ),
-            icon: Icon(
-              Icons.bike_scooter,
-              color: color6,
-            ),
-            backgroundColor: color3,
-          ),
-        ));
+        floatingActionButton: isFirstRequestSent
+            ? (myExistingRide == 0 || myExistingRide['is_paid'] == 2)
+                ? Padding(
+                    padding: const EdgeInsets.only(bottom: 10.0),
+                    child: FloatingActionButton.extended(
+                      onPressed: () {
+                        if (myExistingRide == 0) {
+                          _makePreReservation();
+                        } else {
+                          Routes(context: context).navigate(Reservation(
+                              ongoing: myExistingRide,
+                              isSearch: (myExistingRide == 0),
+                              bikes: availableBikes,
+                              from: LatLng(
+                                  double.parse(myExistingRide['from_ltd']),
+                                  double.parse(myExistingRide['from_lng'])),
+                              to: LatLng(double.parse(myExistingRide['to_ltd']),
+                                  double.parse(myExistingRide['to_lng']))));
+                        }
+                      },
+                      label: Text(
+                        myExistingRide == 0
+                            ? dashboard_make_an_reservation.toUpperCase()
+                            : dashboard_make_an_reservation_qr.toUpperCase(),
+                        style: TextStyle(
+                            fontWeight: FontWeight.w500, color: color6),
+                      ),
+                      icon: Icon(
+                        myExistingRide == 0
+                            ? Icons.bike_scooter
+                            : Icons.lock_clock,
+                        color: color6,
+                      ),
+                      backgroundColor: color3,
+                    ),
+                  )
+                : const SizedBox.shrink()
+            : const SizedBox.shrink());
   }
 
   Future<void> _getMyLocation() async {
@@ -312,11 +357,12 @@ class _DashboardState extends State<Dashboard> {
                             'lng': _fromLocation!.longitude.toString(),
                             'ltd': _fromLocation!.latitude.toString()
                           }).then((List<dynamic> value) {
+                            Navigator.pop(context);
                             Routes(context: context).navigate(Reservation(
-                              bikes: value,
-                              from: _fromLocation,
-                              to:_toLocation
-                            ));
+                                isSearch: true,
+                                bikes: value,
+                                from: _fromLocation,
+                                to: _toLocation));
                           });
                         } else {
                           Navigator.pop(context);
@@ -340,23 +386,26 @@ class _DashboardState extends State<Dashboard> {
     markerIcon ??= await getBytesFromAsset(logo, 100);
 
     // ignore: use_build_context_synchronously
-    await _bikeController
-        .getAvailableBikes(context)
-        .then((List<dynamic> value) {
-      for (var element in value) {
-        _availableBikes.add(Marker(
-          markerId: MarkerId(element['id'].toString()),
-          position: LatLng(
-            double.parse(element['ltd'].toString()),
-            double.parse(element['lng'].toString()),
-          ),
-          icon: BitmapDescriptor.fromBytes(markerIcon!),
-          // onTap: () {
-          //   _onMarkerTapped(markerId);
-          // },
-        ));
-      }
-      setState(() {});
+    await _bikeController.getAvailableBikes(context).then((dynamic value) {
+      setState(() {
+        if (isFirstRequestSent == false) isFirstRequestSent = true;
+
+        myExistingRide = value['ongoing_order'];
+        availableBikes = value['bikes'];
+        for (var element in value['bikes']) {
+          _availableBikes.add(Marker(
+            markerId: MarkerId(element['id'].toString()),
+            position: LatLng(
+              double.parse(element['ltd'].toString()),
+              double.parse(element['lng'].toString()),
+            ),
+            icon: BitmapDescriptor.fromBytes(markerIcon!),
+            // onTap: () {
+            //   _onMarkerTapped(markerId);
+            // },
+          ));
+        }
+      });
     });
   }
 

@@ -10,6 +10,7 @@ import 'package:pickandgo/Models/Strings/dashboard.dart';
 import 'package:pickandgo/Models/Strings/reservation.dart';
 import 'package:pickandgo/Models/Utils/Colors.dart';
 import 'package:pickandgo/Models/Utils/Common.dart';
+import 'package:pickandgo/Models/Utils/Images.dart';
 import 'package:pickandgo/Models/Utils/Routes.dart';
 import 'package:pickandgo/Models/Utils/Utils.dart';
 import 'package:pickandgo/Views/Dashboard/dashboard.dart';
@@ -24,22 +25,39 @@ class Reservation extends StatefulWidget {
   dynamic from;
   dynamic to;
   dynamic bikes;
+  dynamic ongoing;
+  bool isSearch;
 
   Reservation(
-      {Key? key, required this.bikes, required this.from, required this.to})
+      {Key? key,
+      required this.bikes,
+      this.ongoing,
+      required this.from,
+      required this.to,
+      required this.isSearch})
       : super(key: key);
 
   @override
-  State<Reservation> createState() =>
-      _ReservationState(bikes: bikes, from: from, to: to);
+  State<Reservation> createState() => _ReservationState(
+      bikes: bikes,
+      from: from,
+      to: to,
+      isSearch: isSearch,
+      ongoing: ongoing ?? null);
 }
 
 class _ReservationState extends State<Reservation> {
   LatLng from;
   LatLng to;
   dynamic bikes;
+  dynamic ongoing;
+  bool isSearch;
   _ReservationState(
-      {required this.bikes, required this.from, required this.to});
+      {required this.bikes,
+      required this.from,
+      required this.ongoing,
+      required this.to,
+      required this.isSearch});
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey qrKey = GlobalKey();
@@ -128,7 +146,10 @@ class _ReservationState extends State<Reservation> {
                                 ),
                                 Center(
                                   child: Text(
-                                    dashboard_show_availabilities.toUpperCase(),
+                                    isSearch
+                                        ? dashboard_show_availabilities
+                                            .toUpperCase()
+                                        : dashboard_ongoing_ride.toUpperCase(),
                                     style: TextStyle(
                                         fontWeight: FontWeight.w500,
                                         color: color6,
@@ -144,90 +165,144 @@ class _ReservationState extends State<Reservation> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
                               vertical: 10.0, horizontal: 5.0),
-                          child: ListView(
-                            children: [
-                              for (dynamic bike in bikes)
-                                Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 3.0),
-                                  child: Card(
-                                    child: ListTile(
-                                      leading: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: const [
-                                          Icon(Icons.pedal_bike)
-                                        ],
-                                      ),
-                                      title: Padding(
+                          child: (isSearch)
+                              ? ListView(
+                                  children: [
+                                    for (dynamic bike in bikes)
+                                      Padding(
                                         padding:
-                                            const EdgeInsets.only(bottom: 10.0),
-                                        child: Text(
-                                          bike['reference'].toString(),
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.w500),
+                                            EdgeInsets.symmetric(vertical: 3.0),
+                                        child: Card(
+                                          child: ListTile(
+                                            leading: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: const [
+                                                Icon(Icons.pedal_bike)
+                                              ],
+                                            ),
+                                            title: Padding(
+                                              padding: const EdgeInsets.only(
+                                                  bottom: 10.0),
+                                              child: Text(
+                                                bike['reference'].toString(),
+                                                style: const TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.w500),
+                                              ),
+                                            ),
+                                            subtitle: Text(
+                                              "${double.parse(bike['distance'].toString()).toStringAsFixed(1)}KM From You",
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 12.0,
+                                                  color: (double.parse(
+                                                              bike['distance']
+                                                                  .toString()) <
+                                                          3)
+                                                      ? color13
+                                                      : color12),
+                                            ),
+                                            trailing: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Wrap(
+                                                  direction: Axis.horizontal,
+                                                  spacing: 10.0,
+                                                  children: [
+                                                    GestureDetector(
+                                                        onTap: () async {
+                                                          if (await CustomUtils
+                                                              .confirmationAction(
+                                                                  context,
+                                                                  "Confirmation",
+                                                                  "Are you sure to navigate ?")) {
+                                                            navigateTo(
+                                                                double.parse(bike[
+                                                                        'ltd'] ??
+                                                                    from.latitude
+                                                                        .toString()),
+                                                                double.parse(bike[
+                                                                        'lng'] ??
+                                                                    from.longitude
+                                                                        .toString()));
+                                                          }
+                                                        },
+                                                        child: Icon(
+                                                          Icons.navigation,
+                                                          color: color13,
+                                                        )),
+                                                    GestureDetector(
+                                                        onTap: () async {
+                                                          if (await CustomUtils
+                                                              .confirmationAction(
+                                                                  context,
+                                                                  "Confirmation",
+                                                                  "Are you sure reserve until you got it (For Maximum 1 Hour) ?")) {
+                                                            _rideOnDetails(base64Encode(
+                                                                utf8.encode(bike[
+                                                                        'mac_address']
+                                                                    .toString())));
+                                                          }
+                                                        },
+                                                        child: Icon(
+                                                          Icons.satellite,
+                                                          color: color1,
+                                                        )),
+                                                  ],
+                                                )
+                                              ],
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                      subtitle: Text(
-                                        "${double.parse(bike['distance'].toString()).toStringAsFixed(1)}KM From You",
+                                      )
+                                  ],
+                                )
+                              : Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SizedBox(
+                                      width: displaySize.width * 0.8,
+                                      child: Image.asset(reservationOngoing),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 30.0),
+                                      child: Text(
+                                        reservation_go_to_your_ride,
                                         style: TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 12.0,
-                                            color: (double.parse(
-                                                        bike['distance']
-                                                            .toString()) <
-                                                    3)
-                                                ? color13
-                                                : color12),
-                                      ),
-                                      trailing: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Wrap(
-                                            direction: Axis.horizontal,
-                                            spacing: 10.0,
-                                            children: [
-                                              GestureDetector(
-                                                  onTap: () async {
-                                                    if (await CustomUtils
-                                                        .confirmationAction(
-                                                            context,
-                                                            "Confirmation",
-                                                            "Are you sure to navigate ?")) {
-                                                      navigateTo(from.latitude,
-                                                          from.longitude);
-                                                    }
-                                                  },
-                                                  child: Icon(
-                                                    Icons.navigation,
-                                                    color: color13,
-                                                  )),
-                                              GestureDetector(
-                                                  onTap: () async {
-                                                    if (await CustomUtils
-                                                        .confirmationAction(
-                                                            context,
-                                                            "Confirmation",
-                                                            "Are you sure reserve until you got it (For Maximum 1 Hour) ?")) {
-                                                      _rideOnDetails(base64Encode(
-                                                          utf8.encode(bike[
-                                                                  'mac_address']
-                                                              .toString())));
-                                                    }
-                                                  },
-                                                  child: Icon(
-                                                    Icons.satellite,
-                                                    color: color1,
-                                                  )),
-                                            ],
-                                          )
-                                        ],
+                                            fontWeight: FontWeight.w500,
+                                            color: color3,
+                                            fontSize: 16.0),
                                       ),
                                     ),
-                                  ),
-                                )
-                            ],
-                          ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 30.0),
+                                      child: CustomButton(
+                                          buttonText: reservation_navigate,
+                                          textColor: color6,
+                                          backgroundColor: color3,
+                                          isBorder: false,
+                                          borderColor: color6,
+                                          onclickFunction: () async {
+                                            FocusScope.of(context).unfocus();
+                                            if (await CustomUtils
+                                                .confirmationAction(
+                                                    context,
+                                                    "Confirmation",
+                                                    "Are you sure to navigate ?")) {
+                                              navigateTo(
+                                                  double.parse(
+                                                      ongoing['bike_data']
+                                                          ['ltd']),
+                                                  double.parse(
+                                                      ongoing['bike_data']
+                                                          ['lng']));
+                                            }
+                                          }),
+                                    ),
+                                  ],
+                                ),
                         ))
                   ],
                 ),
@@ -236,9 +311,22 @@ class _ReservationState extends State<Reservation> {
           padding: const EdgeInsets.only(bottom: 10.0),
           child: FloatingActionButton.extended(
             onPressed: () {
-              setState(() {
-                isQr = !isQr;
+              String scannedCode = 'A343K4H3K4H';
+              _qrController.availabilityQRCode(context, {
+                'code': base64Encode(utf8.encode(scannedCode)),
+                'lng': to.longitude.toString(),
+                'ltd': to.latitude.toString(),
+                'user': CustomUtils.getUser().id.toString(),
+              }).then((value) {
+                if (value != 2) {
+                  Routes(context: context).navigate(ReservationPayment(
+                      other: value, bike: scannedCode, from: from, to: to, temp: ongoing, ));
+                }
               });
+
+              // setState(() {
+              //   isQr = !isQr;
+              // });
             },
             label: Text(
               (isQr)
@@ -265,14 +353,14 @@ class _ReservationState extends State<Reservation> {
             isQr = false;
             if (scannedCode != null) {
               _qrController.availabilityQRCode(context, {
-                'code': base64Encode(utf8.encode(scannedCode))
+                'code': base64Encode(utf8.encode(scannedCode)),
+                'lng': to.longitude.toString(),
+                'ltd': to.latitude.toString(),
+                'user': CustomUtils.getUser().id.toString(),
               }).then((value) {
                 if (value) {
                   Routes(context: context).navigate(ReservationPayment(
-                      bike: scannedCode, from: from, to: null));
-                } else {
-                  CustomUtils.showSnackBar(context, 'This ride not available',
-                      CustomUtils.ERROR_SNACKBAR);
+                      other: value, bike: scannedCode, from: from, to: to, temp: ongoing, ));
                 }
               });
             }
@@ -297,91 +385,31 @@ class _ReservationState extends State<Reservation> {
   }
 
   void _rideOnDetails(String bikeMacAddress) {
-    showModalBottomSheet(
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(25.0))),
-      context: context,
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
-          child: Wrap(
-            children: [
-              Center(
-                child: Text(
-                  dashboard_make_an_reservation.toUpperCase(),
-                  style: const TextStyle(
-                      fontSize: 15.0, fontWeight: FontWeight.w500),
-                ),
-              ),
-              Divider(
-                color: color3,
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5.0),
-                child: GestureDetector(
-                  onTap: () {
-                    DatePicker.showDateTimePicker(context,
-                        showTitleActions: true,
-                        minTime: DateTime.now(),
-                        maxTime: DateTime.now().add(const Duration(hours: 1)),
-                        onChanged: (date) {}, onConfirm: (date) {
-                      _rideOnDateTime = date;
-                      setState(() {
-                        _rideOnController.text = date.toString();
-                      });
-                    }, currentTime: DateTime.now(), locale: LocaleType.zh);
-                  },
-                  child: CustomTextFormField(
-                    readOnly: true,
-                    height: 5.0,
-                    backgroundColor: color7,
-                    iconColor: color3,
-                    isIconAvailable: true,
-                    hint: 'Enter start date and time',
-                    icon: Icons.search,
-                    textInputType: TextInputType.text,
-                    obscureText: false,
-                    controller: _rideOnController,
-                    validation: (value) {
-                      return null;
-                    },
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5.0),
-                child: Center(
-                  child: CustomButton(
-                      buttonText:
-                          reservation_ride_temporary_reserve.toUpperCase(),
-                      textColor: color6,
-                      backgroundColor: color3,
-                      isBorder: false,
-                      borderColor: color6,
-                      onclickFunction: () async {
-                        if (_rideOnController.text.isNotEmpty &&
-                            _rideOnDateTime != null) {
-                          _qrController.reserveByHour(context, {
-                            'code': bikeMacAddress,
-                            'user': CustomUtils.getUser().id.toString(),
-                            'ride_at': _rideOnDateTime.toString(),
-                          });
-                          Routes(context: context)
-                              .navigateReplace(const Dashboard());
-                        } else {
-                          Navigator.pop(context);
-                          CustomUtils.showSnackBar(
-                              context,
-                              'Please select ride on date and time',
-                              CustomUtils.ERROR_SNACKBAR);
-                        }
-                      }),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
+    DatePicker.showDateTimePicker(context,
+        showTitleActions: true,
+        minTime: DateTime.now(),
+        maxTime: DateTime.now().add(const Duration(hours: 1)),
+        onChanged: (date) {}, onConfirm: (date) {
+      _rideOnDateTime = date;
+      if (_rideOnDateTime != null) {
+        _qrController.reserveByHour(context, {
+          'code': bikeMacAddress.toString(),
+          'user': CustomUtils.getUser().id.toString(),
+          'ride_at': _rideOnDateTime!.toIso8601String(),
+          'from_lng': from.longitude.toString(),
+          'from_ltd': from.latitude.toString(),
+          'to_lng': to.longitude.toString(),
+          'to_ltd': to.latitude.toString(),
+        }).then((value) {
+          if (value) {
+            Navigator.pop(context);
+          }
+        });
+      } else {
+        Navigator.pop(context);
+        CustomUtils.showSnackBar(context, 'Please select ride on date and time',
+            CustomUtils.ERROR_SNACKBAR);
+      }
+    }, currentTime: DateTime.now());
   }
 }
