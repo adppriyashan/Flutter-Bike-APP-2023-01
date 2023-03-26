@@ -15,6 +15,12 @@ class APIRoutes {
       case 'TEMP_RESERVATION':
         key = '${_baseRoute}reservation/hour';
         break;
+      case 'FINISH_RESERVATION':
+        key = '${_baseRoute}reservation/finish';
+        break;
+      case 'HISTORY_RESERVATION':
+        key = '${_baseRoute}reservation/history';
+        break;
       case 'AVAILABLE_CHECK':
         key = '${_baseRoute}reservation/availability';
         break;

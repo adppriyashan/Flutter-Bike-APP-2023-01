@@ -27,7 +27,7 @@ class QRController {
     });
     return respCheck;
   }
-  
+
   Future<bool> reserveByHour(context, data) async {
     bool respCheck = false;
     CustomUtils.showLoader(context);
@@ -54,8 +54,6 @@ class QRController {
     await _httpController
         .doGet(APIRoutes.getRoute('AVAILABLE_CHECK'), {}, data)
         .then((Response response) async {
-      print('XXXXXXXXXXXXXXXXXXXXXXXXXXXXX');
-      print(response.data);
       CustomUtils.hideLoader(context);
       var resp = JsonResponse.fromJson(response.data);
       if (resp.statusCode == 200) {
@@ -66,5 +64,14 @@ class QRController {
       }
     });
     return responseOther;
+  }
+
+  Future<void> finishRide(context, data) async {
+    CustomUtils.showLoader(context);
+    await _httpController
+        .doGet(APIRoutes.getRoute('FINISH_RESERVATION'), {}, data)
+        .then((Response response) async {
+      CustomUtils.hideLoader(context);
+    });
   }
 }

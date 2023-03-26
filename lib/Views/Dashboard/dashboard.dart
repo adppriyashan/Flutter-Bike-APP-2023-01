@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -8,13 +9,16 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/geocoding.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:pickandgo/Controllers/BikeController/BikeController.dart';
+import 'package:pickandgo/Controllers/QRController/QRController.dart';
 import 'package:pickandgo/Models/Strings/dashboard.dart';
 import 'package:pickandgo/Models/Utils/Colors.dart';
 import 'package:pickandgo/Models/Utils/Common.dart';
 import 'package:pickandgo/Models/Utils/Images.dart';
 import 'package:pickandgo/Models/Utils/Routes.dart';
 import 'package:pickandgo/Models/Utils/Utils.dart';
+import 'package:pickandgo/Views/Dashboard/drawer.dart';
 import 'package:pickandgo/Views/Reservations/reservation.dart';
+import 'package:pickandgo/Views/Reservations/reservation_payment.dart';
 import 'package:pickandgo/Views/Widgets/custom_button.dart';
 import 'package:pickandgo/Views/Widgets/custom_text_form_field.dart';
 
@@ -35,6 +39,7 @@ class _DashboardState extends State<Dashboard> {
   );
 
   final BikeController _bikeController = BikeController();
+  final QRController _qrController = QRController();
 
   final Set<Marker> _availableBikes = {};
 
@@ -90,6 +95,7 @@ class _DashboardState extends State<Dashboard> {
         key: _scaffoldKey,
         resizeToAvoidBottomInset: false,
         backgroundColor: color6,
+        drawer: DashboardMenu(selection: 1),
         body: SafeArea(
             child: SizedBox(
           height: displaySize.height,
@@ -111,7 +117,7 @@ class _DashboardState extends State<Dashboard> {
                             onTap: () {
                               if (_scaffoldKey.currentState!.hasDrawer &&
                                   _scaffoldKey.currentState!.isEndDrawerOpen) {
-                                _scaffoldKey.currentState!.openEndDrawer();
+                                _scaffoldKey.currentState!.closeEndDrawer();
                               } else {
                                 _scaffoldKey.currentState!.openDrawer();
                               }
@@ -174,16 +180,90 @@ class _DashboardState extends State<Dashboard> {
                   ? Expanded(
                       flex: 0,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20.0, vertical: 15.0),
                         width: double.infinity,
                         color: color3,
-                        child: Center(
-                          child: Text(
-                            dashboard_ongoing.toUpperCase(),
-                            style: TextStyle(
-                                fontWeight: FontWeight.w500, color: color6),
-                          ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                                flex: 1,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 45.0, vertical: 5.0),
+                                  child: CustomButton(
+                                      buttonText: dashboard_new_ride,
+                                      textColor: color6,
+                                      backgroundColor: color3,
+                                      isBorder: false,
+                                      borderColor: color6,
+                                      onclickFunction: () async {
+                                        dynamic previousReservation =
+                                            myExistingRide;
+
+                                        await getLocationPredictions(2)
+                                            .then((value) {
+                                          _qrController.finishRide(context, {
+                                            'id':
+                                                myExistingRide['id'].toString()
+                                          }).then((encodedBikeCode) async {
+                                            _qrController
+                                                .availabilityQRCode(context, {
+                                              'bikeId':
+                                                  previousReservation['bike'],
+                                              'lng': _toLocation!.longitude
+                                                  .toString(),
+                                              'ltd': _toLocation!.latitude
+                                                  .toString(),
+                                              'user': CustomUtils.getUser()
+                                                  .id
+                                                  .toString(),
+                                            }).then((value) {
+                                              if (value != 2) {
+                                                Routes(context: context)
+                                                    .navigate(
+                                                        ReservationPayment(
+                                                  other: value,
+                                                  bike: value['bike'],
+                                                  from: LatLng(
+                                                      double.parse(value['ltd']
+                                                          .toString()),
+                                                      double.parse(value['lng']
+                                                          .toString())),
+                                                  to: LatLng(
+                                                      double.parse(_toLocation!
+                                                          .latitude
+                                                          .toString()),
+                                                      double.parse(_toLocation!
+                                                          .longitude
+                                                          .toString())),
+                                                  temp: null,
+                                                ));
+                                              }
+                                            });
+                                          });
+                                        });
+                                      }),
+                                )),
+                            Expanded(
+                                flex: 1,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 45.0, vertical: 5.0),
+                                  child: CustomButton(
+                                      buttonText: dashboard_finish_ride,
+                                      textColor: color6,
+                                      backgroundColor: color3,
+                                      isBorder: false,
+                                      borderColor: color6,
+                                      onclickFunction: () async {
+                                        FocusScope.of(context).unfocus();
+                                        _qrController.finishRide(context, {
+                                          'id': myExistingRide['id'].toString()
+                                        }).then((value) {
+                                          initializeAvailableBikes();
+                                        });
+                                      }),
+                                ))
+                          ],
                         ),
                       ))
                   : const SizedBox.shrink()
@@ -191,7 +271,8 @@ class _DashboardState extends State<Dashboard> {
           ),
         )),
         floatingActionButton: isFirstRequestSent
-            ? (myExistingRide == 0 || myExistingRide['is_paid'] == 2)
+            ? (myExistingRide == 0 ||
+                    (myExistingRide != 0 && myExistingRide['is_paid'] == '2'))
                 ? Padding(
                     padding: const EdgeInsets.only(bottom: 10.0),
                     child: FloatingActionButton.extended(
@@ -243,7 +324,7 @@ class _DashboardState extends State<Dashboard> {
     });
   }
 
-  getLocationPredictions(type) async {
+  Future<void> getLocationPredictions(type) async {
     if (type == 1) {
       _from.text = '';
       _fromLocation = null;
@@ -387,6 +468,8 @@ class _DashboardState extends State<Dashboard> {
 
     // ignore: use_build_context_synchronously
     await _bikeController.getAvailableBikes(context).then((dynamic value) {
+      print(value);
+
       setState(() {
         if (isFirstRequestSent == false) isFirstRequestSent = true;
 

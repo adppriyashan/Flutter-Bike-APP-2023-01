@@ -302,7 +302,7 @@ class _ReservationPaymentState extends State<ReservationPayment> {
                               onclickFunction: () async {
                                 FocusScope.of(context).unfocus();
                                 _qrController.scanQRCode(context, {
-                                  'temp': temp['id'] ?? '',
+                                  'temp': temp!=null ? temp['id'] : '',
                                   'code': base64Encode(
                                       utf8.encode(bike.toString())),
                                   'user': CustomUtils.getUser().id.toString(),
@@ -314,7 +314,7 @@ class _ReservationPaymentState extends State<ReservationPayment> {
                                 }).then((value) {
                                   if (value) {
                                     Routes(context: context)
-                                        .navigateReplace(Dashboard());
+                                        .navigateReplace(const Dashboard());
                                   }
                                 });
                               }),

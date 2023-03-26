@@ -13,8 +13,6 @@ class HttpController {
     return await dioConnection.post(url, queryParameters: data);
   }
 
-
-
   Future<Response> doPostJson(String url, headers,
      data) async {
     Dio dioConnection = Dio();

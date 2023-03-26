@@ -20,6 +20,22 @@ class BikeController {
     return _listResp;
   }
 
+  Future<dynamic> getUserHistory(context) async {
+    CustomUtils.showLoader(context);
+    List<dynamic> _list = [];
+    await _httpController.doGet(APIRoutes.getRoute('HISTORY_RESERVATION'), {}, {
+      'user': CustomUtils.getUser().id.toString()
+    }).then((Response response) async {
+      print(response.data);
+      CustomUtils.hideLoader(context);
+      JsonResponse.fromJson(response.data)
+          .data
+          .forEach((element) => _list.add(element));
+    });
+
+    return _list;
+  }
+
   Future<List<dynamic>> getAvailableBikesByOrder(context, data) async {
     CustomUtils.showLoader(context);
     List<dynamic> _list = [];

@@ -15,3 +15,4 @@ const String reservation_ride_details = 'Your Ride By';
 const String reservation_ride_temporary_reserve = 'Reserve For Hour';
 const String reservation_go_to_your_ride = 'Grab your ride and scan QR';
 const String reservation_navigate = 'Navigate';
+const String history_title = 'History';
