@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pickandgo/Controllers/BikeController/BikeController.dart';
 import 'package:pickandgo/Models/Strings/reservation.dart';
 import 'package:pickandgo/Models/Utils/Colors.dart';
@@ -19,6 +20,8 @@ class _ReservationState extends State<ReservationHistory> {
   dynamic historyRecords = [];
 
   final BikeController _bikeController = BikeController();
+
+  final LatLng _defaultCamera = const LatLng(6.862484, 79.885498);
 
   @override
   void initState() {
@@ -78,7 +81,7 @@ class _ReservationState extends State<ReservationHistory> {
                 Expanded(
                     flex: 1,
                     child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 5.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 5.0),
                       child: ListView(
                         children: [
                           for (dynamic history in historyRecords)
@@ -86,46 +89,116 @@ class _ReservationState extends State<ReservationHistory> {
                               padding:
                                   const EdgeInsets.symmetric(vertical: 3.0),
                               child: Card(
-                                child: ListTile(
-                                  leading: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: const [Icon(Icons.pedal_bike)],
-                                  ),
-                                  title: Padding(
-                                    padding:
-                                        const EdgeInsets.only(bottom: 10.0),
-                                    child: Text(
-                                      ['Successful Ride', 'Expired'][int.parse(
-                                              history['is_paid'].toString()) -
-                                          1],
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w500,
-                                          color: [color13, color1][int.parse(
-                                                  history['is_paid']
+                                child: Wrap(
+                                  children: [
+                                    ListTile(
+                                      leading: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: const [
+                                          Icon(Icons.pedal_bike)
+                                        ],
+                                      ),
+                                      title: Padding(
+                                        padding:
+                                            const EdgeInsets.only(bottom: 10.0),
+                                        child: Text(
+                                          ['Successful Ride', 'Expired'][
+                                              int.parse(history['is_paid']
                                                       .toString()) -
-                                              1]),
-                                    ),
-                                  ),
-                                  subtitle: Text(history['ride_at'].toString(),
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 12.0,
-                                        color: color3,
-                                      )),
-                                  trailing: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(history['total'].toString(),
+                                                  1],
                                           style: TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 12.0,
-                                            color: [color13, color1][int.parse(
-                                                    history['is_paid']
-                                                        .toString()) -
-                                                1],
-                                          ))
-                                    ],
-                                  ),
+                                              fontWeight: FontWeight.w500,
+                                              color: [color13, color1][
+                                                  int.parse(history['is_paid']
+                                                          .toString()) -
+                                                      1]),
+                                        ),
+                                      ),
+                                      subtitle: Wrap(
+                                        children: [
+                                          Text(
+                                              "Ride On : ${history['ride_at']}",
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 12.0,
+                                                color: color3,
+                                              )),
+                                          (history['drop_at'] != null)
+                                              ? Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          top: 10.0),
+                                                  child: Text(
+                                                      "Drop Off : ${history['drop_at']}",
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        fontSize: 12.0,
+                                                        color: color3,
+                                                      )),
+                                                )
+                                              : const SizedBox.shrink()
+                                        ],
+                                      ),
+                                      trailing: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(history['total'].toString(),
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 18.0,
+                                                color: [color13, color1][
+                                                    int.parse(history['is_paid']
+                                                            .toString()) -
+                                                        1],
+                                              ))
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      height: displaySize.height * 0.3,
+                                      child: GoogleMap(
+                                        mapType: MapType.terrain,
+                                        compassEnabled: false,
+                                        myLocationEnabled: false,
+                                        // liteModeEnabled: true,
+                                        zoomControlsEnabled: false,
+                                        polylines: {
+                                          Polyline(
+                                              polylineId: PolylineId(
+                                                  history['id'].toString()),
+                                              color: color3,
+                                              width: 5,
+                                              points: history['history']
+                                                  .map<LatLng>((p) => LatLng(
+                                                      double.parse(
+                                                          p['ltd'].toString()),
+                                                      double.parse(
+                                                          p['lng'].toString())))
+                                                  .toList())
+                                        },
+                                        initialCameraPosition: CameraPosition(
+                                          target: history['history'].length > 0
+                                              ? LatLng(
+                                                  double.parse(
+                                                      history['history'][0]
+                                                              ['ltd']
+                                                          .toString()),
+                                                  double.parse(
+                                                      history['history'][0]
+                                                              ['lng']
+                                                          .toString()))
+                                              : _defaultCamera,
+                                          zoom: 11,
+                                        ),
+                                        onMapCreated:
+                                            (GoogleMapController controller) {},
+                                      ),
+                                    )
+                                  ],
                                 ),
                               ),
                             )

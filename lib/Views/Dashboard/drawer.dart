@@ -6,6 +6,7 @@ import 'package:pickandgo/Models/Utils/Images.dart';
 import 'package:pickandgo/Models/Utils/Routes.dart';
 import 'package:pickandgo/Models/Utils/Utils.dart';
 import 'package:pickandgo/Views/Auth/login.dart';
+import 'package:pickandgo/Views/Common/leaderboard.dart';
 import 'package:pickandgo/Views/Reservations/history.dart';
 
 class DashboardMenu extends StatefulWidget {
@@ -110,6 +111,26 @@ class _DashboardMenuState extends State<DashboardMenu> {
             ),
             onTap: (){
               Routes(context: context).navigate(ReservationHistory());
+            },
+          ),
+          ListTile(
+            tileColor: (selection == 2) ? color4.withOpacity(0.3) : color6,
+            leading: Icon(
+              Icons.military_tech_outlined,
+              color: color3.withOpacity(0.8),
+            ),
+            title: Text(
+              'Leaderboard',
+              style: GoogleFonts.nunitoSans(
+                  color: color3, fontWeight: FontWeight.w400),
+            ),
+            trailing: Icon(
+              Icons.arrow_forward_ios,
+              color: color3,
+              size: 15.0,
+            ),
+            onTap: (){
+              Routes(context: context).navigate(LeaderBoard());
             },
           ),
           ListTile(

@@ -9,11 +9,20 @@ class APIRoutes {
       case 'LOGIN':
         key = '${_baseRoute}auth/login';
         break;
+      case 'EMERGENCY':
+        key = '${_baseRoute}emergency/inform';
+        break;
       case 'QRSCAN':
         key = '${_baseRoute}reservation/qrscan';
         break;
+      case 'LEADERBOARD':
+        key = '${_baseRoute}user/leaderboard';
+        break;
       case 'TEMP_RESERVATION':
         key = '${_baseRoute}reservation/hour';
+        break;
+      case 'LOCK_BIKE_RESERVATION':
+        key = '${_baseRoute}reservation/lock';
         break;
       case 'FINISH_RESERVATION':
         key = '${_baseRoute}reservation/finish';

@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:pickandgo/Controllers/Common/HttpController.dart';
-import 'package:pickandgo/Models/DB/User.dart';
 import 'package:pickandgo/Models/Utils/APIRoutes.dart';
 import 'package:pickandgo/Models/Utils/JsonResponse.dart';
 import 'package:pickandgo/Models/Utils/Utils.dart';
@@ -70,6 +69,15 @@ class QRController {
     CustomUtils.showLoader(context);
     await _httpController
         .doGet(APIRoutes.getRoute('FINISH_RESERVATION'), {}, data)
+        .then((Response response) async {
+      CustomUtils.hideLoader(context);
+    });
+  }
+
+  Future<void> lockStatus(context, data) async {
+    CustomUtils.showLoader(context);
+    await _httpController
+        .doGet(APIRoutes.getRoute('LOCK_BIKE_RESERVATION'), {}, data)
         .then((Response response) async {
       CustomUtils.hideLoader(context);
     });

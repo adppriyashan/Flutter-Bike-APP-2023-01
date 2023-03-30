@@ -26,6 +26,7 @@ class BikeController {
     await _httpController.doGet(APIRoutes.getRoute('HISTORY_RESERVATION'), {}, {
       'user': CustomUtils.getUser().id.toString()
     }).then((Response response) async {
+      print('XXXXXXXXXXX');
       print(response.data);
       CustomUtils.hideLoader(context);
       JsonResponse.fromJson(response.data)
